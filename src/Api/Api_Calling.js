@@ -1,8 +1,10 @@
 import axios from "axios";
 // const Api_Url = "https://get-hire-backend.vercel.app/";
-const Api_Url = "https://gethire-backend.onrender.com/";
-// const Api_Url = "http://localhost:5000/";
-// const Api_Url = process.env.REACT_APP_BACKEND_URL
+// const Api_Url = process.env.REACT_APP_BACKEND_URL 
+//                           ? process.env.REACT_APP_BACKEND_URL 
+//                           : "https://gethire-backend.onrender.com/";
+// const Api_Url = "https://gethire-backend.onrender.com/";
+const Api_Url = "http://localhost:5000/"
 
 const checkToken = (message) => {
   if (message === "Unauthorized") {

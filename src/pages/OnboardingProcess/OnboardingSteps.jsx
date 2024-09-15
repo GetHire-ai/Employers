@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Typography,
   TextField,
@@ -9,14 +9,17 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 import axios from "axios";
 
 const OnboardingSteps = ({ data, step, updateOnboarding }) => {
   const [formData, setFormData] = useState({
-    fullName: data?.fullName,
-    contactInformation: "",
+    fullName: data?.StudentId?.Name,
+    contactInformation: data?.StudentId?.Number,
+    emailInformation: data?.StudentId?.Email,
     residentialAddress: "",
-    jobTitle: "",
+    jobTitle: data?.JobId?.positionName,
     department: "",
     startDate: "",
     documentFiles: {
@@ -38,6 +41,12 @@ const OnboardingSteps = ({ data, step, updateOnboarding }) => {
     offerLetterTemplate: "",
   });
 
+  useEffect(() => {
+    console.log(data.StudentId);
+    console.log(data.CompanyId);
+    console.log(data.JobId);
+  }, [])
+
   const formFields = {
     "Personal Information": [
       {
@@ -52,6 +61,11 @@ const OnboardingSteps = ({ data, step, updateOnboarding }) => {
         type: "text",
       },
       {
+        name: "emailInformation",
+        label: "Email Information",
+        type: "email",
+      },
+      {
         name: "residentialAddress",
         label: "Residential Address",
         type: "text",
@@ -61,19 +75,17 @@ const OnboardingSteps = ({ data, step, updateOnboarding }) => {
       { name: "jobTitle", label: "Job Title", type: "text" },
       { name: "department", label: "Department", type: "text" },
       { name: "startDate", label: "Start Date", type: "date" },
+      { name: "salary", label: "Salary Offered", type: "number" },
+      { name: "employmentContract", label: "Employment Contract", type: "file"},
+      { name: "nda", label: "NDA", type: "file" },
+      { name: "additionalDocument", label: "Additional Document", type: "file" },
     ],
     "Document Submission": [
-      {
-        name: "employmentContract",
-        label: "Employment Contract",
-        type: "file",
-      },
-      { name: "nda", label: "NDA", type: "file" },
-      { name: "taxForms", label: "Tax Forms", type: "file" },
-      { name: "panCard", label: "PAN Card", type: "file" },
-      { name: "aadharCard", label: "Aadhar Card", type: "file" },
-      { name: "salarySlip", label: "Salary Slip", type: "file" },
-      { name: "bankStatement", label: "Bank Statement", type: "file" },
+      { name: "taxForms", label: "Tax Forms", type: "checkbox" },
+      { name: "panCard", label: "PAN Card", type: "checkbox" },
+      { name: "aadharCard", label: "Aadhar Card", type: "checkbox" },
+      { name: "salarySlip", label: "Salary Slip", type: "checkbox" },
+      { name: "bankStatement", label: "Bank Statement", type: "checkbox" },
     ],
     "Access & IT Setup": [
       { name: "emailAccount", label: "Company Email", type: "text" },
@@ -90,6 +102,7 @@ const OnboardingSteps = ({ data, step, updateOnboarding }) => {
         label: "Role-Specific Training",
         type: "file",
       },
+      { name: "additionalDocument2", label: "Additional Document", type: "file" },
     ],
     "Team Integration": [
       { name: "teamIntroduction", label: "Team Introduction", type: "text" },
@@ -106,13 +119,13 @@ const OnboardingSteps = ({ data, step, updateOnboarding }) => {
       {
         name: "offerLetterTemplate",
         label: "Offer Letter Template",
-        type: "select",
-        options: [
-          { value: "standard", label: "Standard Offer Letter" },
-          { value: "executive", label: "Executive Offer Letter" },
-          { value: "internship", label: "Internship Offer Letter" },
-          { value: "contractual", label: "Contractual Offer Letter" },
-        ],
+        type: "file",
+        // options: [
+        //   { value: "standard", label: "Standard Offer Letter" },
+        //   { value: "executive", label: "Executive Offer Letter" },
+        //   { value: "internship", label: "Internship Offer Letter" },
+        //   { value: "contractual", label: "Contractual Offer Letter" },
+        // ],
       },
     ],
   };
@@ -142,10 +155,12 @@ const OnboardingSteps = ({ data, step, updateOnboarding }) => {
     // Append regular fields
     formDataToSend.append("fullName", formData.fullName);
     formDataToSend.append("contactInformation", formData.contactInformation);
+    formDataToSend.append("EmailInformation", formData.emailInformation);
     formDataToSend.append("residentialAddress", formData.residentialAddress);
     formDataToSend.append("jobTitle", formData.jobTitle);
     formDataToSend.append("department", formData.department);
     formDataToSend.append("startDate", formData.startDate);
+    formDataToSend.append("salary", formData.startDate);
     formDataToSend.append("emailAccount", formData.emailAccount);
     formDataToSend.append("softwareAccess", formData.softwareAccess);
     formDataToSend.append("teamIntroduction", formData.teamIntroduction);
@@ -163,9 +178,10 @@ const OnboardingSteps = ({ data, step, updateOnboarding }) => {
 
   const renderForm = () => {
     const fields = formFields[step] || [];
-
+  
     return fields.map((field) => {
-      if (field.type === "text" || field.type === "date") {
+      // Text, Date, Email
+      if (["text", "date", "email", "number"].includes(field.type)) {
         return (
           <TextField
             key={field.name}
@@ -182,30 +198,31 @@ const OnboardingSteps = ({ data, step, updateOnboarding }) => {
           />
         );
       }
-
+  
+      // File Upload
       if (field.type === "file") {
         return (
           <Box key={field.name} mb={2}>
             <Typography>{field.label}</Typography>
-            <Button variant="contained" component="label">
-              Upload {field.label}
-              <input
-                type="file"
-                hidden
-                onChange={(e) => handleFileChange(e, field.name)}
-              />
-            </Button>
+            <TextField
+              type="file"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              onChange={(e) => handleFileChange(e, field.name)}
+              variant="outlined"
+            />
           </Box>
         );
       }
-
+  
+      // Select Dropdown
       if (field.type === "select") {
         return (
           <FormControl key={field.name} fullWidth margin="normal">
             <InputLabel>{field.label}</InputLabel>
             <Select
               name={field.name}
-              value={formData[field.name]}
+              value={formData[field.name] || ""}
               onChange={handleChange}
             >
               {field.options.map((option) => (
@@ -217,10 +234,35 @@ const OnboardingSteps = ({ data, step, updateOnboarding }) => {
           </FormControl>
         );
       }
+      
+  
+      // Checkbox Toggle
+      if (field.type === "checkbox") {
+        return (
+          <Box key={field.name} display="flex" justifyContent="center" mb={2}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData[field.name] || false}
+                  onChange={(e) =>
+                    handleChange({ target: { name: field.name, value: e.target.checked } })
+                  }
+                  name={field.name}
+                  color="primary"
+                />
+              }
+              label={field.label}
+              style={{ display: 'block', textAlign: 'center' }} // This ensures the label is centered and vertical
+            />
+          </Box>
+        );
+      }
 
+  
       return null;
     });
   };
+  
 
   return (
     <Box p={2}>

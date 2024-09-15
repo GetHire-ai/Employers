@@ -21,7 +21,7 @@ const steps = [
   "Orientation & Training",
   "Team Integration",
   "Company Policies & Benefits",
-  "Offer Letter Template Selection (New Step)",
+  "Offer Letter Template Selection",
   "Onboarding Completion",
 ];
 
@@ -41,7 +41,6 @@ const Index = () => {
         `api/CompanyRoutes/get-onboarding/${state.jobId}/${state.studentId}/${state.companyId}`
       );
       setOnboardingData(res?.data?.data || {});
-      console.error(res.data.data);
     } catch (err) {
       setError("Failed to fetch data");
       console.error(err.response);
@@ -63,24 +62,25 @@ const Index = () => {
       setLoading(false);
     }
   };
-  // const getAllJobs = async () => {
-  //   try {
-  //     const res = await GetApi("api/CompanyRoutes/GetAllJobswithApplication");
-  //     setAllJobs(res?.data?.data || []);
-  //   } catch (err) {
-  //     setError("Failed to fetch jobs");
-  //     console.error(err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-  // const handleJobChange = (event, newValue) => {
-  //   setSelectedJob(newValue);
-  //   console.log("Selected job:", newValue);
-  // };
+  const getAllJobs = async () => {
+    try {
+      const res = await GetApi("api/CompanyRoutes/GetAllJobswithApplication");
+      setAllJobs(res?.data?.data || []);
+    } catch (err) {
+      setError("Failed to fetch jobs");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleJobChange = (event, newValue) => {
+    setSelectedJob(newValue);
+    console.log("Selected job:", newValue);
+  };
 
   useEffect(() => {
-    // getAllJobs();
+    setStep(steps[0]);
+    getAllJobs();
     getOnboarding();
   }, []);
 
